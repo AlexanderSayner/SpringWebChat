@@ -1,0 +1,74 @@
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: chatuser
+      POSTGRES_PASSWORD: chatpass
+    ports:
+      - "7543:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts/create-databases.sql:/docker-entrypoint-initdb.d/create-databases.sql
+    networks:
+      - app-network
+
+  adminer:
+    image: adminer
+    container_name: adminer-db-ui
+    ports:
+      - "8091:8080"
+    environment:
+      - ADMINER_DEFAULT_DB_DRIVER=pgsql
+      - ADMINER_DEFAULT_DB_HOST=postgres
+      - ADMINER_DEFAULT_DB_NAME=chatappdb
+      - ADMINER_DEFAULT_DB_USER=chatuser
+      - ADMINER_DEFAULT_DB_PASS=chatpass
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  bookshop-service:
+    build:
+      context: ./web-chat-backend
+      dockerfile: Dockerfile
+    container_name: web-chat-backend-service
+    ports:
+      - "8181:8180"
+    depends_on:
+      - postgres
+    environment:
+      - CHAT_APP_DB_URL=jdbc:postgresql://postgres:5432/chatappdb
+      - CHAT_APP_DB_USER=chatuser
+      - CHAT_APP_DB_PWD=chatpass
+      - VK_CLIENT_ID=${VK_CLIENT_ID}
+      - VK_CLIENT_SECRET=${VK_CLIENT_SECRET}
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  web-chat-frontend:
+    build:
+      context: ./web-chat-frontend
+      dockerfile: Dockerfile
+    container_name: web-chat-frontend-service
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_WS_URL=ws://web-chat-backend-service:8180/graphql
+      - VK_APP_ID=${VK_APP_ID}
+    depends_on:
+      - bookshop-service
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

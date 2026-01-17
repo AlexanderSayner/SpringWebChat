@@ -1,0 +1,3 @@
+CREATE DATABASE chatappdb;
+
+GRANT ALL PRIVILEGES ON DATABASE chatappdb TO chatuser;
