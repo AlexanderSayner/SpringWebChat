@@ -1,60 +1,39 @@
-# Environment variables
-#.env
-
-# Dependencies
-node_modules/
-
-# Build outputs
-dist/
+# Build and Gradle
 build/
-target/
+gradle/
+.gradle/
+#gradle-wrapper.*
+#gradlew
+#gradlew.bat
 
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.swp
-
-# IDE specific
-.vscode/
+# IDE
 .idea/
+*.iml
+.settings/
+bin/
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Config
+application-local.*
+.env
+local.properties
+external.properties
 
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
+# Logs and temp
+logs/
+*.log
+tmp/
 
-# Local environment
-.env.local
-.env.*
+# OS and editor
+.DS_Store
+*.swp
+*.swo
 
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Compiled
+*.class
+*.jar
+*.war
+
+# Misc
+*.cache
+*.diff
+*.patch

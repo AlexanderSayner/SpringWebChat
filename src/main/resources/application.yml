@@ -1,0 +1,64 @@
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
+
+# Database Configuration
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/chatdb}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:none}
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # Flyway configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    out-of-order: false
+
+  # Thymeleaf Configuration
+  thymeleaf:
+    cache: false
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+
+  # Security Configuration
+  security:
+    oauth2:
+      client:
+        registration:
+          vk:
+            client-id: ${VK_CLIENT_ID:your-vk-app-id}
+            client-secret: ${VK_CLIENT_SECRET:your-vk-app-secret}
+            authorization-grant-type: authorization_code
+            scope: email
+            redirect-uri: ${VK_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}
+            client-name: VK
+            client-authentication-method: client_secret_post
+            pkce-enabled: true
+            provider: vk
+        provider:
+          vk:
+            authorization-uri: https://id.vk.com/authorize
+            token-uri: https://id.vk.com/access_token
+            user-info-uri: https://api.vk.com/method/users.get?fields=first_name,last_name,photo_100,email&v=5.131
+            user-info-authentication-method: query
+            user-name-attribute: response
+
+# WebSocket Configuration
+websocket:
+  path: /ws
