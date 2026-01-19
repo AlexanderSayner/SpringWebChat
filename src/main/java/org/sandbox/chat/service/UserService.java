@@ -3,6 +3,7 @@ package org.sandbox.chat.service;
 import lombok.RequiredArgsConstructor;
 import org.sandbox.chat.model.User;
 import org.sandbox.chat.repository.UserRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,6 +21,13 @@ public class UserService {
     public User createOrGet(User user) {
         return userRepository.findByProviderAndProviderId(user.getProvider(), user.getProviderId())
                 .orElseGet(() -> userRepository.save(user));
+    }
+
+    public User updateNickname(User user) {
+        final User entity = userRepository.findByProviderAndProviderId(user.getProvider(), user.getProviderId())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        entity.setNickname(user.getNickname());
+        return userRepository.save(entity);
     }
 
 }

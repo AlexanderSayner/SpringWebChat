@@ -32,7 +32,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/vk")
-    public ResponseEntity<?> handleVkAuth(
+    public String handleVkAuth(
             @RequestBody Map<String, String> payload,
             HttpServletRequest request,
             HttpServletResponse response) {
@@ -80,13 +80,14 @@ public class AuthController {
             session.setAttribute("SPRING_SECURITY_CONTEXT", context);
 
             if (user.getNickname() == null) {
-                return ResponseEntity.ok().header("Location", "/nickname").build();
+                return "redirect:/nickname";
             } else {
-                return ResponseEntity.ok().build();
+                return "redirect:/chat";
             }
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Authentication failed: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return "Authentication failed: %s".formatted(e.getMessage());
         }
     }
 

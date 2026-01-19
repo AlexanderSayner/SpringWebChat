@@ -37,7 +37,7 @@ public class NicknameController {
         User user = userService.findByProviderAndProviderId("vk", providerId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setNickname(nickname);
-        userService.createOrGet(user);
+        userService.updateNickname(user);
 
         return "redirect:/chat";
     }
