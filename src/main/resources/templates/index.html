@@ -69,22 +69,26 @@
           });
 
           function vkidOnSuccess(data) {
-              console.log("Auth data:", data);
-              floatingOneTap.close();
-
               fetch('/api/auth/vk', {
                   method: 'POST',
                   headers: {
                       'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({ token: data.access_token }),
-                  credentials: 'include' // Ensure cookies are sent with the request
-              }).then(response => {
+                  credentials: 'include' // Send cookies with request
+              })
+              .then(response => {
                   if (response.ok) {
-                      window.location.href = '/home'; // Redirect to home page after successful login
+                      window.location.href = '/chat';
                   } else {
-                      alert('Server authentication failed');
+                      return response.text().then(text => {
+                          console.error("Authentication failed:", text);
+                          alert("Authentication failed: " + text);
+                      });
                   }
+              })
+              .catch(error => {
+                  console.error("Network error:", error);
               });
           }
 
