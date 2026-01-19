@@ -79,7 +79,11 @@ public class AuthController {
             HttpSession session = request.getSession(true);
             session.setAttribute("SPRING_SECURITY_CONTEXT", context);
 
-            return ResponseEntity.ok().build();
+            if (user.getNickname() == null) {
+                return ResponseEntity.ok().header("Location", "/nickname").build();
+            } else {
+                return ResponseEntity.ok().build();
+            }
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Authentication failed: " + e.getMessage());

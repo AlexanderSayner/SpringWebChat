@@ -39,6 +39,8 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    private String nickname;
+
     public User(String username, String email, String provider, String providerId) {
         this.username = username;
         this.email = email;

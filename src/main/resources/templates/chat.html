@@ -122,7 +122,7 @@
                     <img th:if="${message.user.avatarUrl}" class="user-avatar" th:src="${message.user.avatarUrl}"
                          alt="User Avatar">
                     <div>
-                        <strong th:text="*{user.username}">Username</strong><br>
+                        <strong th:text="*{user.nickname} ? *{user.nickname} : *{user.username}">Username</strong>
                         <span th:text="*{content}">Message content</span>
                         <div class="message-info">
                             <span th:text="${#temporals.format(message.timestamp, 'HH:mm')}">Time</span>
