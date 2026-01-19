@@ -17,6 +17,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Comparator;
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class ChatController {
@@ -80,7 +83,11 @@ public class ChatController {
 
     private void prepareChatModel(Model model, int page, int size, User user) {
         Page<Message> messages = messageService.findLatestMessages(page, size);
-        model.addAttribute("messages", messages.getContent());
+         List<Message> content = messages.getContent()
+                .stream()
+                .sorted(Comparator.comparing(Message::getTimestamp)) // Rendering order
+                .toList();
+        model.addAttribute("messages", content);
         model.addAttribute("currentUser", user);
     }
 }
