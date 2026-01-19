@@ -1,24 +1,24 @@
-FROM eclipse-temurin:25-jdk-noble AS builder
-WORKDIR /app
+#FROM gradle:9.2.1-jdk25 AS build
+FROM gradle:8.14.3-jdk21-graal AS build
 
-COPY gradlew .
-COPY gradle gradle
-COPY build.gradle settings.gradle ./
-RUN ./gradlew build -x test --no-daemon || return 0
+WORKDIR /opt/app
 
-COPY src src
-RUN ./gradlew bootJar --no-daemon
-RUN java -Djarmode=tools -jar build/libs/*.jar extract --destination build/extracted
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
 
-FROM eclipse-temurin:25-jre-noble
-WORKDIR /app
+COPY src/ ./src/
 
-RUN useradd -m spring
-USER spring
+RUN gradle bootJar
 
-COPY --from=builder /app/build/extracted/lib/ ./lib/
-COPY --from=builder /app/build/extracted/*.jar ./app.jar
+RUN java -Djarmode=layertools -jar build/libs/*.jar extract
+
+
+FROM openjdk:21-ea-21-bullseye
+
+WORKDIR /opt/app
+
+COPY build/libs/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/opt/app/app.jar"]

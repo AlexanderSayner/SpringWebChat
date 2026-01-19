@@ -20,7 +20,7 @@ services:
     image: adminer
     container_name: adminer-db-ui
     ports:
-      - "9090:8080"
+      - "8081:8080"
     environment:
       - ADMINER_DEFAULT_DB_DRIVER=pgsql
       - ADMINER_DEFAULT_DB_HOST=postgres
@@ -43,8 +43,8 @@ services:
       - DATABASE_URL=jdbc:postgresql://postgres:5432/chatappdb
       - DATASOURCE_USERNAME=postgres
       - DATASOURCE_PASSWORD=password
-      - VK_CLIENT_ID=${VK_CLIENT_ID}
-      - VK_REDIRECT_URI=${VK_REDIRECT_URI:-http://localhost:8080/chat}
+      - VK_APP_ID=${VK_APP_ID}
+      - VK_REDIRECT_URL=${VK_REDIRECT_URL}
     networks:
       - app-network
     restart: unless-stopped
