@@ -1,39 +1,24 @@
-# Use official OpenJDK runtime as base image
-FROM openjdk:17-jdk-slim
-
-# Set the working directory inside the container
+FROM eclipse-temurin:25-jdk-noble AS builder
 WORKDIR /app
 
-# Copy the Gradle wrapper files
 COPY gradlew .
-COPY gradle/ ./gradle/
+COPY gradle gradle
+COPY build.gradle settings.gradle ./
+RUN ./gradlew build -x test --no-daemon || return 0
 
-# Make the gradlew executable
-RUN chmod +x ./gradlew
+COPY src src
+RUN ./gradlew bootJar --no-daemon
+RUN java -Djarmode=tools -jar build/libs/*.jar extract --destination build/extracted
 
-# Copy the build.gradle file
-COPY build.gradle .
+FROM eclipse-temurin:25-jre-noble
+WORKDIR /app
 
-# Download dependencies
-RUN ./gradlew build --exclude-task=:bootJar --exclude-task=:jar --console=plain
+RUN useradd -m spring
+USER spring
 
-# Copy the rest of the application source code
-COPY src/ ./src/
+COPY --from=builder /app/build/extracted/lib/ ./lib/
+COPY --from=builder /app/build/extracted/*.jar ./app.jar
 
-# Build the application
-RUN ./gradlew bootJar --console=plain
-
-# Expose port 8080
 EXPOSE 8080
 
-# Define environment variables with defaults
-ENV SERVER_PORT=8080
-ENV DATABASE_URL=jdbc:postgresql://localhost:5432/chatdb
-ENV DATABASE_USERNAME=postgres
-ENV DATABASE_PASSWORD=password
-ENV VK_CLIENT_ID=your-vk-app-id
-ENV VK_CLIENT_SECRET=your-vk-app-secret
-ENV VK_REDIRECT_URI=http://localhost:8080/login/oauth2/code/vk
-
-# Run the application
-ENTRYPOINT ["java", "-jar", "build/libs/chat-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

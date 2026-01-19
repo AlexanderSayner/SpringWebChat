@@ -1,6 +1,6 @@
 # Build and Gradle
 build/
-gradle/
+#gradle/
 .gradle/
 #gradle-wrapper.*
 #gradlew
