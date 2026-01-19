@@ -32,7 +32,7 @@ public class ChatController {
     @GetMapping("/chat")
     public String chat(Authentication authentication, Model model,
                        @RequestParam(defaultValue = "0") int page,
-                       @RequestParam(defaultValue = "20") int size) {
+                       @RequestParam(defaultValue = "10") int size) {
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/";
