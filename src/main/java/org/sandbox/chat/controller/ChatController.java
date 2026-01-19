@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequiredArgsConstructor
 public class ChatController {
+    private static final String VK_PROVIDER = "vk";
 
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
@@ -43,12 +44,11 @@ public class ChatController {
 
         // Extract user info from authentication
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-        String provider = extractProvider(authentication);
         String providerId = oauth2User.getAttribute("id").toString();
 
         // Find or create user
-        User user = userService.findByProviderAndProviderId(provider, providerId)
-                .orElseGet(() -> createNewUser(oauth2User, provider, providerId));
+        User user = userService.findByProviderAndProviderId(VK_PROVIDER, providerId)
+                .orElseGet(() -> createNewUser(oauth2User, providerId));
 
         // Load messages and add to model
         prepareChatModel(model, page, size, user);
@@ -64,18 +64,11 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/messages", savedMessage);
     }
 
-    private String extractProvider(Authentication authentication) {
-        return authentication.getAuthorities().iterator().next()
-                .getAuthority()
-                .replace("OAUTH2_", "")
-                .toLowerCase();
-    }
-
-    private User createNewUser(OAuth2User oauth2User, String provider, String providerId) {
-        return userService.save(new User(
+    private User createNewUser(OAuth2User oauth2User, String providerId) {
+        return userService.createOrGet(new User(
                 getFullName(oauth2User),
                 oauth2User.getAttribute("email"),
-                provider,
+                VK_PROVIDER,
                 providerId
         ));
     }
@@ -86,10 +79,9 @@ public class ChatController {
 
     private User getAuthenticatedUser(Authentication authentication) {
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-        String provider = extractProvider(authentication);
         String providerId = oauth2User.getAttribute("id").toString();
 
-        return userService.findByProviderAndProviderId(provider, providerId)
+        return userService.findByProviderAndProviderId(VK_PROVIDER, providerId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 

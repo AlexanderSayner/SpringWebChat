@@ -107,12 +107,11 @@
 <div class="chat-container">
     <div class="chat-header">
         <h4>Web Chat</h4>
-        <div class="user-info"
-             sec:authentication="principal.attributes.first_name + ' ' + principal.attributes.last_name">
-                <span sec:authorize="isAuthenticated()">
-                    Welcome, <span sec:authentication="principal.attributes.first_name"></span>!
-                    <a href="/logout" class="logout-link">Logout</a>
-                </span>
+        <div class="user-info">
+            <span sec:authorize="isAuthenticated()">
+                Welcome, <span th:text="${currentUser.username}">User</span>!
+                <a href="/logout" class="logout-link">Logout</a>
+            </span>
         </div>
     </div>
 

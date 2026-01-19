@@ -7,12 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.sandbox.chat.model.User;
 import org.sandbox.chat.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +42,7 @@ public class AuthController {
         try {
             // Fetch user info from VK API
             Map<String, Object> userInfo = getVkUserInfo(accessToken);
-            Map<String, Object> userData = (Map<String, Object>) ((List<Map<String, Object>>)userInfo.get("response")).get(0);
+            Map<String, Object> userData = ((List<Map<String, Object>>) userInfo.get("response")).get(0);
 
             // Create or update user
             User user = userService.findByProviderAndProviderId("vk", userData.get("id").toString())
@@ -52,14 +53,21 @@ public class AuthController {
                                 "vk",
                                 userData.get("id").toString()
                         );
-                        return userService.save(newUser);
+                        return userService.createOrGet(newUser);
                     });
 
-            // Create authentication token
-            Authentication auth = new UsernamePasswordAuthenticationToken(
-                    user.getId(),
-                    null,
-                    AuthorityUtils.createAuthorityList("ROLE_USER")
+            // Create a proper OAuth2User principal
+            OAuth2User oauth2User = new DefaultOAuth2User(
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
+                    userData,
+                    "id"  // Use "id" as the key for the user's ID
+            );
+
+            // Create authentication token with the OAuth2User as principal
+            Authentication auth = new OAuth2AuthenticationToken(
+                    oauth2User,
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
+                    "vk"
             );
 
             // Set authentication in security context

@@ -4,7 +4,6 @@ import org.sandbox.chat.model.User;
 import org.sandbox.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -100,7 +99,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
                     "vk",
                     userId.toString()
                 );
-                return userService.save(newUser);
+                return userService.createOrGet(newUser);
             });
 
         // Update normalized attributes with user data
