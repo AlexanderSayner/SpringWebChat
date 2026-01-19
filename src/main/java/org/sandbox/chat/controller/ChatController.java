@@ -26,13 +26,6 @@ public class ChatController {
     private final MessageService messageService;
     private final UserService userService;
 
-    @GetMapping("/")
-    public String home(Authentication authentication) {
-        return authentication != null && authentication.isAuthenticated()
-                ? "redirect:/chat"
-                : "index";
-    }
-
     @GetMapping("/chat")
     public String chat(Authentication authentication, Model model,
                        @RequestParam(defaultValue = "0") int page,

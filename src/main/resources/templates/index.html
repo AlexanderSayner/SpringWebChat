@@ -44,11 +44,11 @@
           const VKID = window.VKIDSDK;
 
           VKID.Config.init({
-            app: 54398832,
-            redirectUrl: 'https://mbuml-5-3-69-239.a.free.pinggy.link/chat', // Ensure this matches your VK app settings
+            app: [[${@environment.getProperty('vk.app.id')}]],
+            redirectUrl: '[[${@environment.getProperty('vk.redirect.url')}]]',
             responseMode: VKID.ConfigResponseMode.Callback,
             source: VKID.ConfigSource.LOWCODE,
-            scope: 'email', // Add the necessary scopes
+            scope: 'email',
           });
 
           const floatingOneTap = new VKID.FloatingOneTap();

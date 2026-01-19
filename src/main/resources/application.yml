@@ -36,28 +36,11 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
 
-  # Security Configuration
-  security:
-    oauth2:
-      client:
-        registration:
-          vk:
-            client-id: ${VK_CLIENT_ID:your-vk-app-id}
-            client-secret: ${VK_CLIENT_SECRET:your-vk-app-secret}
-            authorization-grant-type: authorization_code
-            scope: email
-            redirect-uri: ${VK_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}
-            client-name: VK
-            client-authentication-method: client_secret_post
-            pkce-enabled: true
-            provider: vk
-        provider:
-          vk:
-            authorization-uri: https://id.vk.com/authorize
-            token-uri: https://id.vk.com/access_token
-            user-info-uri: https://api.vk.com/method/users.get?fields=first_name,last_name,photo_100,email&v=5.131
-            user-info-authentication-method: query
-            user-name-attribute: response
+vk:
+  app:
+    id: ${VK_APP_ID}
+  redirect:
+    url: ${VK_REDIRECT_URL}
 
 # WebSocket Configuration
 websocket:
