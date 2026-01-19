@@ -1,5 +1,6 @@
 package org.sandbox.chat.service;
 
+import lombok.RequiredArgsConstructor;
 import org.sandbox.chat.model.Message;
 import org.sandbox.chat.model.User;
 import org.sandbox.chat.repository.MessageRepository;
@@ -10,10 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class MessageService {
 
-    @Autowired
-    private MessageRepository messageRepository;
+    private final MessageRepository messageRepository;
 
     public Message save(Message message) {
         return messageRepository.save(message);
