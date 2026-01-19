@@ -45,7 +45,7 @@
 
           VKID.Config.init({
             app: 54398832,
-            redirectUrl: 'https://dnlir-95-104-198-153.a.free.pinggy.link/chat', // Ensure this matches your VK app settings
+            redirectUrl: 'https://mbuml-5-3-69-239.a.free.pinggy.link/chat', // Ensure this matches your VK app settings
             responseMode: VKID.ConfigResponseMode.Callback,
             source: VKID.ConfigSource.LOWCODE,
             scope: 'email', // Add the necessary scopes
@@ -69,23 +69,23 @@
           });
 
           function vkidOnSuccess(data) {
-            console.log("Auth data:", data); // Debug log
-            floatingOneTap.close();
+              console.log("Auth data:", data);
+              floatingOneTap.close();
 
-            fetch('/api/auth/vk', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ token: data.access_token }),
-            }).then(response => {
-                if (response.ok) {
-                    // Перенаправляем пользователя на главную страницу или выполняем другие действия
-                    window.location.href = '/home';
-                } else {
-                    alert('Ошибка аутентификации на сервере');
-                }
-    });
+              fetch('/api/auth/vk', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ token: data.access_token }),
+                  credentials: 'include' // Ensure cookies are sent with the request
+              }).then(response => {
+                  if (response.ok) {
+                      window.location.href = '/home'; // Redirect to home page after successful login
+                  } else {
+                      alert('Server authentication failed');
+                  }
+              });
           }
 
           function vkidOnError(error) {

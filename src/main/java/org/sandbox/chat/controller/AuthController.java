@@ -1,13 +1,11 @@
 package org.sandbox.chat.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import org.sandbox.chat.model.User;
+import org.sandbox.chat.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,62 +17,37 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final UserService userService;
 
     @PostMapping("/vk")
-    public ResponseEntity<String> handleVkAuth(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<String> handleVkAuth(@RequestBody Map<String, String> payload, HttpSession session) {
         String accessToken = payload.get("token");
 
-        // Fetch user info from VK API
+        // Use the token to fetch user information from VK API
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://api.vk.com/method/users.get?fields=first_name,last_name,email&access_token=" + accessToken + "&v=5.131";
-        String userInfoResponse = restTemplate.getForObject(url, String.class);
+        Map<String, Object> userInfo = restTemplate.getForObject(url, Map.class);
 
-        try {
-            // Parse the response from VK API
-            Map<String, Object> userInfoMap = objectMapper.readValue(userInfoResponse, Map.class);
-            List<Map<String, Object>> responseList = (List<Map<String, Object>>) userInfoMap.get("response");
-            if (responseList == null || responseList.isEmpty()) {
-                return ResponseEntity.badRequest().body("Invalid user info response from VK");
-            }
-            Map<String, Object> userData = responseList.get(0);
+        // Extract user information
+        List<Map<String, Object>> responseList = (List<Map<String, Object>>) userInfo.get("response");
+        Map<String, Object> userData = responseList.get(0);
 
-            String vkId = userData.get("id").toString();
-            String firstName = (String) userData.get("first_name");
-            String lastName = (String) userData.get("last_name");
-            String email = (String) userData.get("email");
+        // Create or update user in your system
+        User user = new User(
+                userData.get("first_name") + " " + userData.get("last_name"),
+                String.valueOf(userData.get("email")),
+                "vk",
+                String.valueOf(userData.get("id"))
+        );
+        userService.save(user);
 
-            // Create authorities (roles)
-            List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
+        // Set user in session or security context
+        session.setAttribute("user", user);
 
-            // Create an OAuth2User object
-            OAuth2User oauth2User = new DefaultOAuth2User(
-                    authorities,
-                    Map.of(
-                            "id", vkId,
-                            "first_name", firstName,
-                            "last_name", lastName,
-                            "email", email
-                    ),
-                    "id"
-            );
-
-            // Create an authentication token
-            OAuth2AuthenticationToken authentication = new OAuth2AuthenticationToken(
-                    oauth2User,
-                    authorities,
-                    "vk"
-            );
-
-            // Set the authentication in the security context
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            return ResponseEntity.ok("Аутентификация успешна");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Error processing user info");
-        }
+        return ResponseEntity.ok("Authentication successful");
     }
 }
+
